@@ -1,0 +1,6 @@
+[font]
+normal = {family = "Pennywort", style = "Regular"}
+bold = {family = "Pennywort", style = "Bold"}
+italic = {family = "Pennywort", style = "Italic"}
+bold_italic = {family = "Pennywort", style = "BoldItalic"}
+size = 12.0
