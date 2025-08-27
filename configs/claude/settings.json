@@ -1,0 +1,32 @@
+{
+  "includeCoAuthoredBy": false,
+  "permissions": {
+    "allow": [
+      "Bash(git:*)",
+      "Bash(npm:*)",
+      "Bash(node:*)",
+      "Bash(tsc:*)",
+      "Bash(npx:*)",
+      "Bash(python:*)",
+      "Bash(pip:*)",
+      "Bash(poetry:*)",
+      "Bash(uv:*)",
+      "Bash(cargo:*)",
+      "Bash(rustc:*)",
+      "Bash(docker:*)"
+    ],
+    "ask": ["Bash(git push:*)", "Bash(curl:*)"],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets/**)",
+      "Bash(sudo:*)",
+      "Bash(npm publish:*)",
+      "Bash(yarn publish:*)",
+      "Bash(poetry publish:*)",
+      "Bash(uv publish:*)",
+      "Bash(cargo publish:*)",
+      "Bash(docker push:*)"
+    ]
+  }
+}
