@@ -18,8 +18,9 @@
 ### TypeScript
 
 - Use kebab-case for file names
-- Use type by default instead of interface, except when declaration merging or public API extension is required
-- Do not use `any` or `unknown` types
+- Use `type` by default instead of `interface`, except when declaration merging or public API extension is required
+- Do not use `any`, allow `unknown` only when dealing with unknown data
+- Use arrow functions by default, except for utility or library functions
 - Include JSDoc comments for all exported functions
 
 ## Documentation Requirements
