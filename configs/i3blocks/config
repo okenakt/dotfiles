@@ -1,0 +1,56 @@
+# ---- i3blocks config (legacy-safe) ----
+
+# [net]
+# command=~/.config/i3blocks/scripts/net.sh
+# interval=5
+# separator=true
+# separator_block_width=12
+
+[network_speed]
+command=~/.config/i3blocks/scripts/net_speed.sh
+interval=1
+separator=true
+separator_block_width=12
+
+[disk]
+command=~/.config/i3blocks/scripts/disk.sh
+interval=60
+separator=true
+separator_block_width=12
+
+[cpu]
+command=~/.config/i3blocks/scripts/cpu.sh
+interval=5
+separator=true
+separator_block_width=12
+
+[memory]
+command=~/.config/i3blocks/scripts/memory.sh
+interval=5
+separator=true
+separator_block_width=12
+
+[temp]
+command=~/.config/i3blocks/scripts/temp.sh
+interval=5
+separator=true
+separator_block_width=12
+
+[gpu]
+command=~/.config/i3blocks/scripts/gpu.sh
+interval=2
+separator=true
+separator_block_width=12
+
+[volume]
+command=~/.config/i3blocks/scripts/volume.sh
+interval=1
+signal=1
+separator=true
+separator_block_width=12
+
+[time]
+command=date '+%Y/%m/%d %a %H:%M:%S'
+interval=1
+separator=true
+separator_block_width=16
