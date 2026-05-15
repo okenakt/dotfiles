@@ -31,8 +31,8 @@ client.urgent           #FFD27A #1A1A24 #1A1A1A #FFD27A #FFD27A
 # Gaps
 gaps inner 4
 gaps outer 0
-smart_gaps on
-smart_borders on
+# smart_gaps on
+# smart_borders on
 
 ############################
 # Autostart
