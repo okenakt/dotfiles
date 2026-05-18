@@ -10,9 +10,9 @@ set $mod Mod4
 font pango:Pennywort23 10
 
 # Session control
-bindsym $mod+Shift+c reload
-bindsym $mod+Shift+r restart
-bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'Exit i3?' -B 'Yes' 'i3-msg exit'"
+bindsym $mod+Ctrl+r reload
+bindsym $mod+Ctrl+Shift+r restart
+bindsym $mod+Ctrl+q exec "i3-nagbar -t warning -m 'Exit i3?' -B 'Yes' 'i3-msg exit'"
 
 ############################
 # Look & Decorations
@@ -46,8 +46,9 @@ exec_always --no-startup-id feh --bg-fill ~/Pictures/wallpapers/neon-city.jpg
 ############################
 # Keys (apps & window ops)
 ############################
-bindsym $mod+Return exec alacritty
-bindsym $mod+space  exec --no-startup-id rofi -show drun
+bindsym $mod+Return exec --no-startup-id rofi -show drun
+bindsym $mod+grave  exec --no-startup-id flatpak run org.wezfurlong.wezterm
+bindsym $mod+e      exec --no-startup-id rofi -show window
 bindsym $mod+l      exec --no-startup-id i3lock
 bindsym $mod+q      kill
 
@@ -66,21 +67,21 @@ bindsym $mod+Shift+Right move right
 # Layout
 bindsym $mod+h split h
 bindsym $mod+v split v
+bindsym $mod+d layout default
 bindsym $mod+f fullscreen toggle
 bindsym $mod+s layout stacking
-bindsym $mod+w layout tabbed
-bindsym $mod+e layout toggle split
+bindsym $mod+t layout tabbed
 
 # Floating
 floating_modifier $mod
 bindsym $mod+button3 floating toggle
 
-# Resize mode
+# Resize
+bindsym $mod+equal resize grow width 10 px or 10 ppt
+bindsym $mod+plus  resize grow height 10 px or 10 ppt
+bindsym $mod+minus resize shrink width 10 px or 10 ppt
+bindsym $mod+underscore resize shrink height 10 px or 10 ppt
 mode "resize" {
-    bindsym j resize shrink width 10 px or 10 ppt
-    bindsym k resize grow   height 10 px or 10 ppt
-    bindsym l resize shrink height 10 px or 10 ppt
-    bindsym semicolon resize grow width 10 px or 10 ppt
     bindsym Left  resize shrink width 10 px or 10 ppt
     bindsym Down  resize grow   height 10 px or 10 ppt
     bindsym Up    resize shrink height 10 px or 10 ppt
