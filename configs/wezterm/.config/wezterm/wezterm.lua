@@ -12,7 +12,7 @@ config.font = wezterm.font("Pennywort23", { weight = "Regular", stretch = "Norma
 config.font_size = 10
 
 -- GUI
-config.color_scheme = "AdventureTime"
+config.color_scheme = "Subliminal"
 config.window_background_opacity = 0.8
 config.hide_tab_bar_if_only_one_tab = true
 
