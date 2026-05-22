@@ -87,3 +87,6 @@ if command -v powerline-daemon >/dev/null 2>&1 && [ -r /usr/share/powerline/bind
   POWERLINE_BASH_SELECT=1
   . /usr/share/powerline/bindings/bash/powerline.sh
 fi
+
+# wezterm
+alias wezterm='flatpak run org.wezfurlong.wezterm'
