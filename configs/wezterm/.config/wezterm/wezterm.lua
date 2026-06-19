@@ -11,10 +11,18 @@ end
 config.font = wezterm.font("Pennywort23", { weight = "Regular", stretch = "Normal", style = "Normal" })
 config.font_size = 10
 
--- GUI
+-- Appearance
 config.color_scheme = "Subliminal"
 config.window_background_opacity = 0.8
 config.hide_tab_bar_if_only_one_tab = true
+config.window_padding = {
+	left = 0,
+	right = 0,
+	top = 0,
+	bottom = 0,
+}
+config.initial_cols = 96
+config.initial_rows = 48
 
 -- Key Bindings
 config.keys = {
