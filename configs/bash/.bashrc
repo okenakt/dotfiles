@@ -88,5 +88,13 @@ if command -v powerline-daemon >/dev/null 2>&1 && [ -r /usr/share/powerline/bind
   . /usr/share/powerline/bindings/bash/powerline.sh
 fi
 
+# IME
+export GTK_IM_MODULE=fcitx
+export QT_IM_MODULE=fcitx
+export XMODIFIERS=@im=fcitx
+
 # wezterm
 alias wezterm='flatpak run org.wezfurlong.wezterm'
+
+# gnome-control-center
+alias settings='env XDG_CURRENT_DESKTOP=GNOME gnome-control-center'

@@ -77,36 +77,38 @@
   // ======================================//
   {
     "key": "alt+up",
-    "command": "workbench.action.navigateUp"
+    "command": "workbench.action.navigateUp",
+    "when": "!terminalFocus"
   },
   {
     "key": "alt+down",
-    "command": "workbench.action.navigateDown"
+    "command": "workbench.action.navigateDown",
+    "when": "!terminalFocus"
   },
   {
     "key": "alt+left",
-    "command": "workbench.action.navigateLeft"
+    "command": "workbench.action.navigateLeft",
+    "when": "!terminalFocus"
   },
   {
     "key": "alt+right",
-    "command": "workbench.action.navigateRight"
+    "command": "workbench.action.navigateRight",
+    "when": "!terminalFocus"
   },
   {
     "key": "alt+pageup",
-    "command": "workbench.action.previousEditor"
+    "command": "workbench.action.previousEditor",
+    "when": "!terminalFocus"
   },
   {
     "key": "alt+pagedown",
-    "command": "workbench.action.nextEditor"
+    "command": "workbench.action.nextEditor",
+    "when": "!terminalFocus"
   },
   {
     "key": "alt+enter",
-    "command": "workbench.action.showCommands"
-  },
-  {
-    "key": "alt+f",
-    "command": "workbench.action.toggleMaximizedPanel",
-    "when": "terminalFocus"
+    "command": "workbench.action.showCommands",
+    "when": "!terminalFocus"
   },
   {
     "key": "alt+f",
@@ -114,26 +116,29 @@
     "when": "!terminalFocus && (activeEditorGroupEmpty || editorTextFocus || editorIsOpen)"
   },
   {
-    "key": "alt+pageup",
-    "command": "workbench.action.terminal.focusPrevious",
-    "when": "terminalFocus"
-  },
-  {
-    "key": "alt+pagedown",
-    "command": "workbench.action.terminal.focusNext",
-    "when": "terminalFocus"
+    "key": "alt+`",
+    "command": "workbench.action.terminal.focus",
+    "when": "!terminalFocus"
   },
   {
     "key": "alt+`",
-    "command": "workbench.action.terminal.toggleTerminal"
+    "command": "workbench.action.focusActiveEditorGroup",
+    "when": "terminalFocus"
   },
   {
     "key": "alt+=",
-    "command": "workbench.action.increaseViewSize"
+    "command": "workbench.action.increaseViewSize",
+    "when": "!terminalFocus"
   },
   {
     "key": "alt+-",
-    "command": "workbench.action.decreaseViewSize"
+    "command": "workbench.action.decreaseViewSize",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "alt+t",
+    "command": "workbench.action.files.newUntitledFile",
+    "when": "!terminalFocus"
   },
 
   // ======================================//
@@ -141,19 +146,23 @@
   // ======================================//
   {
     "key": "alt+shift+up",
-    "command": "workbench.action.moveEditorToAboveGroup"
+    "command": "workbench.action.moveEditorToAboveGroup",
+    "when": "!terminalFocus"
   },
   {
     "key": "alt+shift+down",
-    "command": "workbench.action.moveEditorToBelowGroup"
+    "command": "workbench.action.moveEditorToBelowGroup",
+    "when": "!terminalFocus"
   },
   {
     "key": "alt+shift+left",
-    "command": "workbench.action.moveEditorToLeftGroup"
+    "command": "workbench.action.moveEditorToLeftGroup",
+    "when": "!terminalFocus"
   },
   {
     "key": "alt+shift+right",
-    "command": "workbench.action.moveEditorToRightGroup"
+    "command": "workbench.action.moveEditorToRightGroup",
+    "when": "!terminalFocus"
   },
 
   // ======================================//
@@ -172,6 +181,105 @@
   {
     "key": "ctrl+alt+`",
     "command": "workbench.action.terminal.new"
+  },
+
+  // ======================================//
+  // Terminal App Context                  //
+  // ======================================//
+  {
+    "key": "alt+up",
+    "command": "workbench.action.terminal.sendSequence",
+    "when": "terminalFocus",
+    "args": { "text": "\u001b[1;3A" }
+  },
+  {
+    "key": "alt+down",
+    "command": "workbench.action.terminal.sendSequence",
+    "when": "terminalFocus",
+    "args": { "text": "\u001b[1;3B" }
+  },
+  {
+    "key": "alt+right",
+    "command": "workbench.action.terminal.sendSequence",
+    "when": "terminalFocus",
+    "args": { "text": "\u001b[1;3C" }
+  },
+  {
+    "key": "alt+left",
+    "command": "workbench.action.terminal.sendSequence",
+    "when": "terminalFocus",
+    "args": { "text": "\u001b[1;3D" }
+  },
+  {
+    "key": "ctrl+alt+up",
+    "command": "workbench.action.terminal.sendSequence",
+    "when": "terminalFocus",
+    "args": { "text": "\u001b[1;7A" }
+  },
+  {
+    "key": "ctrl+alt+down",
+    "command": "workbench.action.terminal.sendSequence",
+    "when": "terminalFocus",
+    "args": { "text": "\u001b[1;7B" }
+  },
+  {
+    "key": "ctrl+alt+right",
+    "command": "workbench.action.terminal.sendSequence",
+    "when": "terminalFocus",
+    "args": { "text": "\u001b[1;7C" }
+  },
+  {
+    "key": "ctrl+alt+left",
+    "command": "workbench.action.terminal.sendSequence",
+    "when": "terminalFocus",
+    "args": { "text": "\u001b[1;7D" }
+  },
+  {
+    "key": "alt+pageup",
+    "command": "workbench.action.terminal.sendSequence",
+    "when": "terminalFocus",
+    "args": { "text": "\u001b[5;3~" }
+  },
+  {
+    "key": "alt+pagedown",
+    "command": "workbench.action.terminal.sendSequence",
+    "when": "terminalFocus",
+    "args": { "text": "\u001b[6;3~" }
+  },
+  {
+    "key": "alt+t",
+    "command": "workbench.action.terminal.sendSequence",
+    "when": "terminalFocus",
+    "args": { "text": "\u001bt" }
+  },
+  {
+    "key": "alt+f",
+    "command": "workbench.action.toggleMaximizedPanel",
+    "when": "terminalFocus"
+  },
+  {
+    "key": "alt+=",
+    "command": "workbench.action.terminal.sendSequence",
+    "when": "terminalFocus",
+    "args": { "text": "\u001b=" }
+  },
+  {
+    "key": "alt+shift+=",
+    "command": "workbench.action.terminal.sendSequence",
+    "when": "terminalFocus",
+    "args": { "text": "\u001b+" }
+  },
+  {
+    "key": "alt+-",
+    "command": "workbench.action.terminal.sendSequence",
+    "when": "terminalFocus",
+    "args": { "text": "\u001b-" }
+  },
+  {
+    "key": "alt+shift+-",
+    "command": "workbench.action.terminal.sendSequence",
+    "when": "terminalFocus",
+    "args": { "text": "\u001b_" }
   },
 
   // ======================================//

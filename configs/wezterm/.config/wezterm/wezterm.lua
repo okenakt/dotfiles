@@ -8,8 +8,8 @@ if wezterm.target_triple == "x86_64-pc-windows-msvc" then
 end
 
 -- Font
-config.font = wezterm.font("Pennywort23", { weight = "Regular", stretch = "Normal", style = "Normal" })
-config.font_size = 10
+config.font = wezterm.font("Pennywort", { weight = "Regular", stretch = "Normal", style = "Normal" })
+config.font_size = 12
 
 -- Appearance
 config.color_scheme = "Subliminal"
@@ -25,116 +25,70 @@ config.initial_cols = 96
 config.initial_rows = 48
 
 -- Key Bindings
+config.disable_default_key_bindings = true
 config.keys = {
-	-- Pane Navigation
+	-- Clipboard
 	{
-		key = "LeftArrow",
-		mods = "ALT",
-		action = act.ActivatePaneDirection("Left"),
+		key = "c",
+		mods = "CTRL|SHIFT",
+		action = act.CopyTo("Clipboard"),
 	},
 	{
-		key = "RightArrow",
-		mods = "ALT",
-		action = act.ActivatePaneDirection("Right"),
-	},
-	{
-		key = "UpArrow",
-		mods = "ALT",
-		action = act.ActivatePaneDirection("Up"),
-	},
-	{
-		key = "DownArrow",
-		mods = "ALT",
-		action = act.ActivatePaneDirection("Down"),
+		key = "v",
+		mods = "CTRL|SHIFT",
+		action = act.PasteFrom("Clipboard"),
 	},
 
-	-- Pane Splitting
+	-- Scrollback
 	{
-		key = "LeftArrow",
-		mods = "CTRL|ALT",
-		action = act.SplitPane({ direction = "Left" }),
-	},
-	{
-		key = "RightArrow",
-		mods = "CTRL|ALT",
-		action = act.SplitPane({ direction = "Right" }),
-	},
-	{
-		key = "UpArrow",
-		mods = "CTRL|ALT",
-		action = act.SplitPane({ direction = "Up" }),
-	},
-	{
-		key = "DownArrow",
-		mods = "CTRL|ALT",
-		action = act.SplitPane({ direction = "Down" }),
+		key = "f",
+		mods = "CTRL|SHIFT",
+		action = act.Search("CurrentSelectionOrEmptyString"),
 	},
 
-	-- Pane Resizing
+	-- Font Size
 	{
 		key = "=",
-		mods = "ALT",
-		action = act.AdjustPaneSize({ "Right", 5 }),
+		mods = "CTRL",
+		action = act.IncreaseFontSize,
 	},
 	{
 		key = "+",
-		mods = "ALT|SHIFT",
-		action = act.AdjustPaneSize({ "Down", 5 }),
+		mods = "CTRL|SHIFT",
+		action = act.IncreaseFontSize,
 	},
 	{
 		key = "-",
-		mods = "ALT",
-		action = act.AdjustPaneSize({ "Left", 5 }),
-	},
-	{
-		key = "_",
-		mods = "ALT|SHIFT",
-		action = act.AdjustPaneSize({ "Up", 5 }),
-	},
-	{
-		key = "f",
-		mods = "ALT",
-		action = act.TogglePaneZoomState,
-	},
-
-	-- Tab Management
-	{
-		key = "t",
 		mods = "CTRL",
-		action = act.SpawnTab("CurrentPaneDomain"),
+		action = act.DecreaseFontSize,
 	},
 	{
-		key = "PageUp",
-		mods = "ALT",
-		action = act.ActivateTabRelative(-1),
-	},
-	{
-		key = "PageDown",
-		mods = "ALT",
-		action = act.ActivateTabRelative(1),
+		key = "0",
+		mods = "CTRL",
+		action = act.ResetFontSize,
 	},
 
-	-- Closing
+	-- Window
 	{
-		key = "q",
-		mods = "ALT",
-		action = act.CloseCurrentPane({ confirm = true }),
+		key = "F11",
+		mods = "NONE",
+		action = act.ToggleFullScreen,
 	},
 	{
-		key = "q",
-		mods = "CTRL|ALT",
-		action = act.CloseCurrentTab({ confirm = true }),
+		key = "n",
+		mods = "CTRL|SHIFT",
+		action = act.SpawnWindow,
 	},
 
-	-- Misc
+	-- WezTerm Management
 	{
-		key = "Enter",
-		mods = "ALT",
+		key = "p",
+		mods = "CTRL|SHIFT",
 		action = act.ActivateCommandPalette,
 	},
 	{
 		key = "d",
-		mods = "ALT",
+		mods = "CTRL|SHIFT",
 		action = act.ShowDebugOverlay,
 	},
 }
