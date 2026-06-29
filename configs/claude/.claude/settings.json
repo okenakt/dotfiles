@@ -1,5 +1,21 @@
 {
+  "model": "opus",
+  "theme": "dark",
+  "tui": "fullscreen",
+  "alwaysThinkingEnabled": true,
   "includeCoAuthoredBy": false,
+  "enabledPlugins": {
+    "codex@openai-codex": true,
+    "telegram@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "openai-codex": {
+      "source": {
+        "source": "github",
+        "repo": "openai/codex-plugin-cc"
+      }
+    }
+  },
   "permissions": {
     "allow": [
       "WebSearch",
