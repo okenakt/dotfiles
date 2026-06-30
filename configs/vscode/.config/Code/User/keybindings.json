@@ -23,14 +23,6 @@
     "command": "cursorBottom"
   },
   {
-    "key": "ctrl+d",
-    "command": "editor.action.revealDefinition"
-  },
-  {
-    "key": "ctrl+m",
-    "command": "bookmarks.toggle"
-  },
-  {
     "key": "ctrl+home",
     "command": "bookmarks.jumpToPrevious"
   },
@@ -39,10 +31,70 @@
     "command": "bookmarks.jumpToNext"
   },
   {
+    "key": "ctrl+`",
+    "command": "workbench.action.closePanel",
+    "when": "terminalViewShowing"
+  },
+  {
+    "key": "ctrl+`",
+    "command": "workbench.action.terminal.toggleTerminal",
+    "when": "!terminalViewShowing"
+  },
+  {
+    "key": "ctrl+e",
+    "command": "workbench.action.showAllEditorsByMostRecentlyUsed"
+  },
+  {
+    "key": "ctrl+r",
+    "command": "editor.action.goToReferences",
+    "when": "editorTextFocus" // keep terminal Ctrl+R reverse-search intact
+  },
+  {
     "key": "ctrl+r",
     "command": "editor.action.startFindReplaceAction",
     "when": "editorFocus && findWidgetVisible"
   },
+  {
+    "key": "ctrl+t",
+    "command": "editor.showCallHierarchy"
+  },
+  {
+    "key": "ctrl+i",
+    "command": "editor.action.indentLines",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "ctrl+o",
+    "command": "workbench.action.quickOpen"
+  },
+  {
+    "key": "ctrl+d",
+    "command": "editor.action.revealDefinition",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "ctrl+g",
+    "command": "workbench.action.gotoLine",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "ctrl+l",
+    "command": "workbench.action.navigateToLastEditLocation",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "ctrl+m",
+    "command": "bookmarks.toggle"
+  },
+  {
+    "key": "ctrl+,",
+    "command": "workbench.action.toggleSidebarVisibility"
+  },
+  {
+    "key": "ctrl+.",
+    "command": "workbench.action.toggleAuxiliaryBar"
+  },
+
   // ======================================//
   // Action Variants (Ctrl+Shift)         //
   // ======================================//
@@ -67,14 +119,19 @@
     "command": "cursorBottomSelect"
   },
   {
-    "key": "ctrl+shift+c",
-    "command": "workbench.action.terminal.copySelection",
-    "when": "terminalFocus && terminalTextSelected"
+    "key": "ctrl+shift+i",
+    "command": "editor.action.outdentLines",
+    "when": "editorTextFocus"
   },
 
   // ======================================//
   // App Context Control (Alt)            //
   // ======================================//
+  {
+    "key": "alt+enter",
+    "command": "workbench.action.showCommands",
+    "when": "!terminalFocus"
+  },
   {
     "key": "alt+up",
     "command": "workbench.action.navigateUp",
@@ -82,8 +139,9 @@
   },
   {
     "key": "alt+down",
-    "command": "workbench.action.navigateDown",
-    "when": "!terminalFocus"
+    "command": "-editor.action.moveLinesDownAction" // temporarily overwritten to re-learn terminal focus
+    // "command": "workbench.action.navigateDown",
+    // "when": "!terminalFocus"
   },
   {
     "key": "alt+left",
@@ -106,14 +164,14 @@
     "when": "!terminalFocus"
   },
   {
-    "key": "alt+enter",
-    "command": "workbench.action.showCommands",
+    "key": "alt+=",
+    "command": "workbench.action.increaseViewSize",
     "when": "!terminalFocus"
   },
   {
-    "key": "alt+f",
-    "command": "workbench.action.toggleMaximizeEditorGroup",
-    "when": "!terminalFocus && (activeEditorGroupEmpty || editorTextFocus || editorIsOpen)"
+    "key": "alt+-",
+    "command": "workbench.action.decreaseViewSize",
+    "when": "!terminalFocus"
   },
   {
     "key": "alt+`",
@@ -126,66 +184,22 @@
     "when": "terminalFocus"
   },
   {
-    "key": "alt+=",
-    "command": "workbench.action.increaseViewSize",
+    "key": "alt+f",
+    "command": "workbench.action.toggleMaximizeEditorGroup",
+    "when": "!terminalFocus && (activeEditorGroupEmpty || editorTextFocus || editorIsOpen)"
+  },
+  {
+    "key": "alt+,",
+    "command": "workbench.action.navigateBack",
     "when": "!terminalFocus"
   },
   {
-    "key": "alt+-",
-    "command": "workbench.action.decreaseViewSize",
-    "when": "!terminalFocus"
-  },
-  {
-    "key": "alt+t",
-    "command": "workbench.action.files.newUntitledFile",
-    "when": "!terminalFocus"
-  },
-
-  // ======================================//
-  // App Context Variants (Alt+Shift)     //
-  // ======================================//
-  {
-    "key": "alt+shift+up",
-    "command": "workbench.action.moveEditorToAboveGroup",
-    "when": "!terminalFocus"
-  },
-  {
-    "key": "alt+shift+down",
-    "command": "workbench.action.moveEditorToBelowGroup",
-    "when": "!terminalFocus"
-  },
-  {
-    "key": "alt+shift+left",
-    "command": "workbench.action.moveEditorToLeftGroup",
-    "when": "!terminalFocus"
-  },
-  {
-    "key": "alt+shift+right",
-    "command": "workbench.action.moveEditorToRightGroup",
+    "key": "alt+.",
+    "command": "workbench.action.navigateForward",
     "when": "!terminalFocus"
   },
 
-  // ======================================//
-  // Ctrl+Alt Assignments                 //
-  // ======================================//
-  {
-    "key": "ctrl+alt+up",
-    "command": "removeSecondaryCursors",
-    "when": "editorTextFocus"
-  },
-  {
-    "key": "ctrl+alt+down",
-    "command": "editor.action.insertCursorBelow",
-    "when": "editorTextFocus"
-  },
-  {
-    "key": "ctrl+alt+`",
-    "command": "workbench.action.terminal.new"
-  },
-
-  // ======================================//
-  // Terminal App Context                  //
-  // ======================================//
+  // Terminal
   {
     "key": "alt+up",
     "command": "workbench.action.terminal.sendSequence",
@@ -280,6 +294,48 @@
     "command": "workbench.action.terminal.sendSequence",
     "when": "terminalFocus",
     "args": { "text": "\u001b_" }
+  },
+
+  // ======================================//
+  // App Context Variants (Alt+Shift)      //
+  // ======================================//
+  {
+    "key": "alt+shift+up",
+    "command": "workbench.action.moveEditorToAboveGroup",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "alt+shift+down",
+    "command": "workbench.action.moveEditorToBelowGroup",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "alt+shift+left",
+    "command": "workbench.action.moveEditorToLeftGroup",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "alt+shift+right",
+    "command": "workbench.action.moveEditorToRightGroup",
+    "when": "!terminalFocus"
+  },
+
+  // ======================================//
+  // App Context Shortcuts (Ctrl+Alt)      //
+  // ======================================//
+  {
+    "key": "ctrl+alt+up",
+    "command": "removeSecondaryCursors",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "ctrl+alt+down",
+    "command": "editor.action.insertCursorBelow",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "ctrl+alt+`",
+    "command": "workbench.action.terminal.new"
   },
 
   // ======================================//
