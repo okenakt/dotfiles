@@ -13,7 +13,6 @@ config.font_size = 12
 
 -- Appearance
 config.color_scheme = "Subliminal"
-config.window_background_opacity = 0.8
 config.hide_tab_bar_if_only_one_tab = true
 config.window_padding = {
 	left = 0,
@@ -29,10 +28,10 @@ config.initial_rows = 48
 -- keys destined for tmux (local or over ssh) are never intercepted by wezterm:
 --   - Alt + ...            -> passed through to the foreground tmux
 --   - `        (backtick)  -> tmux prefix (passed through)
---   - Ctrl + ` (leader)    -> wezterm-local panes/tabs (captured here)
--- Plain backtick still reaches tmux because the leader requires CTRL.
+--   - Shift + Space (leader) -> wezterm-local panes/tabs (captured here)
+-- Shift+Space is an ergonomics exception to the normal Shift-as-variant rule.
 config.disable_default_key_bindings = true
-config.leader = { key = "`", mods = "CTRL", timeout_milliseconds = 1000 }
+config.leader = { key = "Space", mods = "SHIFT", timeout_milliseconds = 1000 }
 config.keys = {
 	-- Clipboard
 	{ key = "c", mods = "CTRL|SHIFT", action = act.CopyTo("Clipboard") },
