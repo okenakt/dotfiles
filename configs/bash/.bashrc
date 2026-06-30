@@ -98,3 +98,6 @@ alias wezterm='flatpak run org.wezfurlong.wezterm'
 
 # gnome-control-center
 alias settings='env XDG_CURRENT_DESKTOP=GNOME gnome-control-center'
+
+# claude code with teleggram plugin
+alias teleclaude='claude --channels plugin:telegram@claude-plugins-official'
