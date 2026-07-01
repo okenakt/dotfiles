@@ -53,6 +53,11 @@ config.keys = {
 	{ key = "Enter", mods = "ALT", action = act.ActivateCommandPalette },
 	{ key = "d", mods = "CTRL|SHIFT", action = act.ShowDebugOverlay },
 
+	-- Multiline input: send "\" + Enter so Claude Code (and shells) treat it as
+	-- a line continuation / newline instead of submit. Deterministic across
+	-- OSes and through tmux/ssh, independent of the kitty keyboard protocol.
+	{ key = "Enter", mods = "SHIFT", action = act.SendString("\\\r") },
+
 	-- Leader: pane navigation (mirrors tmux Alt+arrow)
 	{ key = "LeftArrow", mods = "LEADER", action = act.ActivatePaneDirection("Left") },
 	{ key = "RightArrow", mods = "LEADER", action = act.ActivatePaneDirection("Right") },
