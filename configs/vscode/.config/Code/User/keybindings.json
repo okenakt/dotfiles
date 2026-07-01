@@ -129,8 +129,7 @@
   // ======================================//
   {
     "key": "alt+enter",
-    "command": "workbench.action.showCommands",
-    "when": "!terminalFocus"
+    "command": "workbench.action.showCommands"
   },
   {
     "key": "alt+up",
