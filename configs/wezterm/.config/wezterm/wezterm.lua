@@ -53,26 +53,36 @@ config.keys = {
 	{ key = "Enter", mods = "ALT", action = act.ActivateCommandPalette },
 	{ key = "d", mods = "CTRL|SHIFT", action = act.ShowDebugOverlay },
 
-	-- Multiline input: send "\" + Enter so Claude Code (and shells) treat it as
-	-- a line continuation / newline instead of submit. Deterministic across
-	-- OSes and through tmux/ssh, independent of the kitty keyboard protocol.
+	-- Leader + Enter: send literal Enter
 	{ key = "Enter", mods = "SHIFT", action = act.SendString("\\\r") },
 
-	-- Leader: pane navigation (mirrors tmux Alt+arrow)
+	-- Leader + Arrow: pane navigation
 	{ key = "LeftArrow", mods = "LEADER", action = act.ActivatePaneDirection("Left") },
 	{ key = "RightArrow", mods = "LEADER", action = act.ActivatePaneDirection("Right") },
 	{ key = "UpArrow", mods = "LEADER", action = act.ActivatePaneDirection("Up") },
 	{ key = "DownArrow", mods = "LEADER", action = act.ActivatePaneDirection("Down") },
 
-	-- Leader: pane split toward the arrow (mirrors tmux Ctrl+Alt+arrow)
-	{ key = "LeftArrow", mods = "LEADER|ALT", action = act.SplitPane({ direction = "Left", size = { Percent = 50 } }) },
+	-- Leader + Ctrl + Arrow: split pane
+	{
+		key = "LeftArrow",
+		mods = "LEADER|CTRL",
+		action = act.SplitPane({ direction = "Left", size = { Percent = 50 } }),
+	},
 	{
 		key = "RightArrow",
-		mods = "LEADER|ALT",
+		mods = "LEADER|CTRL",
 		action = act.SplitPane({ direction = "Right", size = { Percent = 50 } }),
 	},
-	{ key = "UpArrow", mods = "LEADER|ALT", action = act.SplitPane({ direction = "Up", size = { Percent = 50 } }) },
-	{ key = "DownArrow", mods = "LEADER|ALT", action = act.SplitPane({ direction = "Down", size = { Percent = 50 } }) },
+	{
+		key = "UpArrow",
+		mods = "LEADER|CTRL",
+		action = act.SplitPane({ direction = "Up", size = { Percent = 50 } }),
+	},
+	{
+		key = "DownArrow",
+		mods = "LEADER|CTRL",
+		action = act.SplitPane({ direction = "Down", size = { Percent = 50 } }),
+	},
 
 	-- Leader: pane zoom / close
 	{ key = "f", mods = "LEADER", action = act.TogglePaneZoomState },
