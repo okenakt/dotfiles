@@ -101,3 +101,7 @@ alias settings='env XDG_CURRENT_DESKTOP=GNOME gnome-control-center'
 
 # claude code with teleggram plugin
 alias teleclaude='claude --channels plugin:telegram@claude-plugins-official'
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
