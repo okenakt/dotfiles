@@ -1,0 +1,10 @@
+#!/bin/bash
+# Use a separate profile when running inside an xrdp session so Chrome's
+# singleton lock doesn't hijack window creation into the local session.
+REAL_BIN=/usr/bin/google-chrome-stable
+
+if [ -n "$XRDP_SESSION" ]; then
+    exec "$REAL_BIN" --user-data-dir="$HOME/.config/google-chrome-remote" "$@"
+else
+    exec "$REAL_BIN" "$@"
+fi

@@ -1,0 +1,14 @@
+#!/bin/bash
+# Use a separate profile/extensions dir when running inside an xrdp session
+# so VS Code's singleton lock doesn't hijack window creation into the local
+# session.
+REAL_BIN=/usr/share/code/bin/code
+
+if [ -n "$XRDP_SESSION" ]; then
+    exec "$REAL_BIN" \
+        --user-data-dir="$HOME/.vscode-remote-data" \
+        --extensions-dir="$HOME/.vscode-remote-extensions" \
+        "$@"
+else
+    exec "$REAL_BIN" "$@"
+fi
