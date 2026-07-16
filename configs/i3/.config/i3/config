@@ -38,6 +38,14 @@ gaps outer 0
 # Autostart
 ############################
 exec --no-startup-id nm-applet
+# im-config's Xsession hook skips (re)launching fcitx5 whenever
+# XMODIFIERS/GTK_IM_MODULE/etc are already set, which they are once any
+# other session for this user has started it (systemd --user env is
+# shared across the physical seat and xrdp sessions). That leaves new
+# sessions (e.g. a fresh xrdp login) with no XIM server on their own
+# $DISPLAY even though the vars look set. Start fcitx5 ourselves, per
+# session, based on whether XIM is actually registered on THIS display.
+exec --no-startup-id sh -c 'xprop -root XIM_SERVERS 2>/dev/null | grep -q ATOM || fcitx5 -d --replace'
 # exec --no-startup-id dunst
 # exec_always --no-startup-id picom --experimental-backends --config ~/.config/picom/picom.conf
 # Wallpaper
