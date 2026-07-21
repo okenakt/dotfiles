@@ -7,6 +7,13 @@ if wezterm.target_triple == "x86_64-pc-windows-msvc" then
 	config.default_prog = { "powershell.exe" }
 end
 
+-- Forward the GUI's own DISPLAY to spawned panes; flatpak-spawn --host does not,
+-- so panes would otherwise inherit a stale shared value. See docs/session-display.md.
+local gui_display = os.getenv("DISPLAY")
+if gui_display and gui_display ~= "" then
+	config.set_environment_variables = { DISPLAY = gui_display }
+end
+
 -- Font
 config.font = wezterm.font("Pennywort", { weight = "Regular", stretch = "Normal", style = "Normal" })
 config.font_size = 12
