@@ -99,8 +99,17 @@ export GTK_IM_MODULE=fcitx
 export QT_IM_MODULE=fcitx
 export XMODIFIERS=@im=fcitx
 
-# wezterm
-alias wezterm='flatpak run org.wezfurlong.wezterm'
+# wezterm: GUI-start path forces --always-new-process (avoid delegating a window
+# to another session's display); other subcommands pass through. See
+# docs/session-display.md.
+wezterm() {
+  case "${1:-}" in
+    ""|start)
+      flatpak run org.wezfurlong.wezterm start --always-new-process "${@:2}" ;;
+    *)
+      flatpak run org.wezfurlong.wezterm "$@" ;;
+  esac
+}
 
 # gnome-control-center
 alias settings='env XDG_CURRENT_DESKTOP=GNOME gnome-control-center'
