@@ -1,1 +1,14 @@
 setxkbmap -layout us -model hhk
+
+# In xrdp sessions (detected by the per-display control socket) export the
+# session markers and load the xrdp PipeWire sink/source; local sessions skip.
+# See docs/remote-audio.md.
+_xrdp_disp=${DISPLAY#:}; _xrdp_disp=${_xrdp_disp%%.*}
+if [ -n "$_xrdp_disp" ] && [ -S "/run/xrdp/sockdir/xrdp_display_${_xrdp_disp}" ]; then
+    export XRDP_SESSION=1
+    export XRDP_SOCKET_PATH=/run/xrdp/sockdir
+    if [ -x /usr/libexec/pipewire-module-xrdp/load_pw_modules.sh ]; then
+        /usr/libexec/pipewire-module-xrdp/load_pw_modules.sh &
+    fi
+fi
+unset _xrdp_disp

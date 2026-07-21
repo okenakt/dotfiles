@@ -1,0 +1,109 @@
+#!/bin/bash
+# Switch the default audio output (sink) between local hardware and the
+# xrdp virtual sink. A test tone can be played on demand with --test.
+#
+# Background: local and xrdp sessions share one user-level PipeWire instance.
+# An xrdp login sets the default sink to "xrdp-sink" and that choice persists
+# (in ~/.local/state/wireplumber/), so a local session is left silent until
+# the default is pointed back at real hardware. This tool makes that switch
+# a one-liner instead of a hand-typed `pactl set-default-sink ...`.
+#
+# Usage:
+#   audio-out            Pick an output from a menu and switch to it
+#   audio-out -l|--list  List available outputs (marks the current default)
+#   audio-out -t|--test  Play a test tone on the current output and exit
+#   audio-out -h|--help  Show this help
+
+set -euo pipefail
+
+die() { echo "audio-out: $*" >&2; exit 1; }
+
+command -v pactl >/dev/null || die "pactl not found (PipeWire/PulseAudio required)"
+
+# Emit "sink_name<TAB>Friendly description" for every available sink.
+list_sinks() {
+    pactl list sinks | awk '
+        /^[[:space:]]*Name:/        { sub(/^[^:]*:[[:space:]]*/, ""); name = $0 }
+        /^[[:space:]]*Description:/ { sub(/^[^:]*:[[:space:]]*/, ""); print name "\t" $0 }
+    '
+}
+
+current_default() { pactl get-default-sink; }
+
+play_test() {
+    echo "Playing test tones on: $(current_default)"
+
+    # speaker-test drives individual channels via -s, so left/right can be
+    # verified separately. It routes through the ALSA "default" pcm, which the
+    # pipewire-alsa plugin forwards to the current PipeWire default sink.
+    # A mono wav played with pw-play/paplay would be up-mixed to both channels
+    # and could not distinguish left from right, so speaker-test is required.
+    if command -v speaker-test >/dev/null; then
+        echo "  left only..."  && speaker-test -D default -c 2 -t wav -l 1 -s 1 >/dev/null 2>&1 || true
+        echo "  right only..." && speaker-test -D default -c 2 -t wav -l 1 -s 2 >/dev/null 2>&1 || true
+    else
+        die "speaker-test not found (install 'alsa-utils')"
+    fi
+    echo "Done."
+}
+
+cmd_list() {
+    local cur; cur=$(current_default)
+    while IFS=$'\t' read -r name desc; do
+        [ -n "$name" ] || continue
+        if [ "$name" = "$cur" ]; then
+            printf '* %s\t(%s)\n' "$desc" "$name"
+        else
+            printf '  %s\t(%s)\n' "$desc" "$name"
+        fi
+    done < <(list_sinks)
+}
+
+cmd_select() {
+    command -v whiptail >/dev/null || die "whiptail not found (install 'whiptail' or use --list)"
+
+    local cur; cur=$(current_default)
+
+    # Use a numeric tag (1..N) so the long sink name never overflows the box;
+    # the friendly description is the visible item, and names[] maps back.
+    local args=() names=() name desc state
+    local n=0 maxlen=0
+    while IFS=$'\t' read -r name desc; do
+        [ -n "$name" ] || continue
+        n=$((n + 1))
+        names[n]=$name
+        [ "$name" = "$cur" ] && { state=ON; desc="$desc (current)"; } || state=OFF
+        args+=("$n" "$desc" "$state")
+        [ ${#desc} -gt "$maxlen" ] && maxlen=${#desc}
+    done < <(list_sinks)
+
+    [ "$n" -gt 0 ] || die "no audio sinks found"
+
+    # Size the box to the content: width = longest item + chrome, height = rows + chrome.
+    local width=$((maxlen + 20))
+    [ "$width" -lt 48 ] && width=48
+    [ "$width" -gt 100 ] && width=100
+    local listh=$n
+    local height=$((listh + 8))
+
+    local choice
+    # whiptail writes the chosen tag to stderr; swap fds to capture it.
+    choice=$(whiptail --title "Audio Output" \
+        --radiolist "Select the default audio output:" \
+        "$height" "$width" "$listh" "${args[@]}" 3>&1 1>&2 2>&3) || { echo "Cancelled."; exit 0; }
+
+    [ -n "$choice" ] || { echo "Nothing selected."; exit 0; }
+
+    local sink=${names[choice]}
+    pactl set-default-sink "$sink"
+    pactl set-sink-mute "$sink" 0 || true
+    echo "Default output -> $sink"
+}
+
+case "${1:-}" in
+    -l|--list) cmd_list ;;
+    -t|--test) play_test ;;
+    -h|--help) awk 'NR==1{next} /^#/{sub(/^# ?/,""); print; next} {exit}' "$0" ;;
+    "") cmd_select ;;
+    *) die "unknown option: $1 (try --help)" ;;
+esac
