@@ -10,7 +10,7 @@ if [ -n "$_xrdp_disp" ] && [ -S "/run/xrdp/sockdir/xrdp_display_${_xrdp_disp}" ]
     # Load the xrdp sink/source only when it is not present yet.
     if [ -x /usr/libexec/pipewire-module-xrdp/load_pw_modules.sh ] &&
         ! pw-cli ls Node 2>/dev/null | grep -q '"xrdp-sink"'; then
-        /usr/libexec/pipewire-module-xrdp/load_pw_modules.sh &
+        /usr/libexec/pipewire-module-xrdp/load_pw_modules.sh >/dev/null 2>&1 &
     fi
 fi
 unset _xrdp_disp
