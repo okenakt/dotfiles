@@ -1,29 +1,41 @@
 {
   "includeCoAuthoredBy": false,
   "permissions": {
+    "defaultMode": "auto",
     "allow": [
       "WebSearch",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:medium.com)",
-      "WebFetch(domain:stackoverflow.com)",
-      "Bash(git:*)",
-      "Bash(npm:*)",
-      "Bash(node:*)",
-      "Bash(tsc:*)",
-      "Bash(npx:*)",
-      "Bash(python:*)",
-      "Bash(pip:*)",
-      "Bash(poetry:*)",
-      "Bash(uv:*)",
-      "Bash(cargo:*)",
-      "Bash(rustc:*)",
-      "Bash(docker:*)"
+      "WebFetch(domain:stackoverflow.com)"
     ],
     "deny": [
       "Read(./.env)",
       "Read(./.env.*)",
       "Read(./secrets/**)",
+
       "Bash(sudo:*)",
+      "Bash(su:*)",
+      "Bash(dd:*)",
+      "Bash(mkfs:*)",
+      "Bash(fdisk:*)",
+      "Bash(parted:*)",
+      "Bash(wipefs:*)",
+      "Bash(shred:*)",
+      "Bash(shutdown:*)",
+      "Bash(reboot:*)",
+      "Bash(poweroff:*)",
+      "Bash(halt:*)",
+      "Bash(useradd:*)",
+      "Bash(userdel:*)",
+      "Bash(usermod:*)",
+      "Bash(passwd:*)",
+      "Bash(visudo:*)",
+      "Bash(iptables:*)",
+      "Bash(nft:*)",
+      "Bash(rm -rf /:*)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+
       "Bash(npm publish:*)",
       "Bash(yarn publish:*)",
       "Bash(poetry publish:*)",
@@ -32,8 +44,25 @@
       "Bash(docker push:*)"
     ],
     "ask": [
+      "Bash(rm:*)",
+      "Bash(rmdir:*)",
+      "Bash(truncate:*)",
+      "Bash(kill:*)",
+      "Bash(pkill:*)",
+      "Bash(killall:*)",
+      "Bash(apt:*)",
+      "Bash(apt-get:*)",
+      "Bash(snap:*)",
       "Bash(git push:*)",
-      "Bash(curl:*)"
+      "Bash(git reset --hard:*)",
+      "Bash(git clean:*)"
+    ]
+  },
+  "autoMode": {
+    "soft_deny": [
+      "$defaults",
+      "Installing, removing, or upgrading system packages, kernel modules, or global toolchains (dpkg -i, flatpak install/uninstall, dkms, update-alternatives, pip/npm global installs)",
+      "Stopping, restarting, enabling, or disabling a running process, systemd unit, or desktop session component"
     ]
   },
   "model": "opus[1m]",
