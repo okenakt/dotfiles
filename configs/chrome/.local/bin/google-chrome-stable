@@ -1,21 +1,18 @@
 #!/bin/bash
-# Use a separate profile when launching onto an xrdp display so Chrome's
-# singleton lock doesn't hijack window creation into the other session: the lock
-# is keyed by --user-data-dir, so a launch that picks the profile already held by
-# the other session gets its window created over there.
-#
-# The session is derived from $DISPLAY (matching ~/.xsessionrc), not from
-# $XRDP_SESSION: that marker leaks into the shared systemd --user environment
-# via dbus-update-activation-environment and into long-lived tmux servers, and
-# nothing ever clears it, so it stays set on the local session too.
-# See docs/session-display.md.
+# Launching onto an xrdp display needs a separate profile (singleton lock) and
+# ANGLE's Vulkan backend (the xrdp X server has no GPU). Session detected from
+# $DISPLAY, not $XRDP_SESSION.
+# See docs/session-display.md and docs/remote-gpu.md.
 REAL_BIN=/usr/bin/google-chrome-stable
 
 _disp=${DISPLAY#:}
 _disp=${_disp%%.*}
 
 if [ -n "$_disp" ] && [ -S "/run/xrdp/sockdir/xrdp_display_${_disp}" ]; then
-    exec "$REAL_BIN" --user-data-dir="$HOME/.config/google-chrome-remote" "$@"
+    exec "$REAL_BIN" \
+        --user-data-dir="$HOME/.config/google-chrome-remote" \
+        --use-angle=vulkan \
+        "$@"
 else
     exec "$REAL_BIN" "$@"
 fi
