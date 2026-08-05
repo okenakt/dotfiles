@@ -1,14 +1,6 @@
 #!/bin/bash
-# Use a separate profile/extensions dir when launching onto an xrdp display so
-# VS Code's singleton lock doesn't hijack window creation into the other
-# session: the lock is keyed by --user-data-dir and its socket lives in the
-# per-user (session-shared) $XDG_RUNTIME_DIR, so a launch that picks the profile
-# already held by the other session gets its window created over there.
-#
-# The session is derived from $DISPLAY (matching ~/.xsessionrc), not from
-# $XRDP_SESSION: that marker leaks into the shared systemd --user environment
-# via dbus-update-activation-environment and into long-lived tmux servers, and
-# nothing ever clears it, so it stays set on the local session too.
+# Launching onto an xrdp display needs a separate profile/extensions dir
+# (singleton lock). Session detected from $DISPLAY, not $XRDP_SESSION.
 # See docs/session-display.md.
 REAL_BIN=/usr/share/code/bin/code
 

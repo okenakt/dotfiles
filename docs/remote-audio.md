@@ -52,8 +52,17 @@ if [ -n "$_xrdp_disp" ] && [ -S "/run/xrdp/sockdir/xrdp_display_${_xrdp_disp}" ]
 fi
 ```
 
-The markers are consumed by the loader itself. They are **not** a reliable
-session signal for anything spawned outside the X session tree: `/etc/X11/
+Both markers are **required by the loader**, which wraps its entire body in
+
+```sh
+if [ -n "$XRDP_SESSION" -a -n "$XRDP_SOCKET_PATH" ]; then
+```
+
+and otherwise exits 0 without creating anything — dropping either export makes
+xrdp audio silently absent, with no error to notice.
+
+They are, however, **not** a reliable session signal for anything spawned
+outside the X session tree: `/etc/X11/
 Xsession.d/95dbus_update-activation-env` copies the whole session environment
 into the per-user (session-shared) systemd/D-Bus activation environment, which
 only ever gains variables, so `XRDP_SESSION=1` survives there — and in
