@@ -47,6 +47,7 @@
       "Bash(curl:*)"
     ]
   },
+  "model": "opus[1m]",
   "enabledPlugins": {
     "codex@openai-codex": true,
     "telegram@claude-plugins-official": true
