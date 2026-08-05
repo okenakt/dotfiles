@@ -1,9 +1,20 @@
 #!/bin/bash
-# Use a separate profile when running inside an xrdp session so Chrome's
-# singleton lock doesn't hijack window creation into the local session.
+# Use a separate profile when launching onto an xrdp display so Chrome's
+# singleton lock doesn't hijack window creation into the other session: the lock
+# is keyed by --user-data-dir, so a launch that picks the profile already held by
+# the other session gets its window created over there.
+#
+# The session is derived from $DISPLAY (matching ~/.xsessionrc), not from
+# $XRDP_SESSION: that marker leaks into the shared systemd --user environment
+# via dbus-update-activation-environment and into long-lived tmux servers, and
+# nothing ever clears it, so it stays set on the local session too.
+# See docs/session-display.md.
 REAL_BIN=/usr/bin/google-chrome-stable
 
-if [ -n "$XRDP_SESSION" ]; then
+_disp=${DISPLAY#:}
+_disp=${_disp%%.*}
+
+if [ -n "$_disp" ] && [ -S "/run/xrdp/sockdir/xrdp_display_${_disp}" ]; then
     exec "$REAL_BIN" --user-data-dir="$HOME/.config/google-chrome-remote" "$@"
 else
     exec "$REAL_BIN" "$@"

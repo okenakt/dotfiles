@@ -159,6 +159,53 @@ session's correct `DISPLAY`) instead of delegating:
 Trade-off: each window is a separate process (slightly more memory; windows are
 not grouped under one instance). Acceptable given the coexistence requirement.
 
+## Related issue: VS Code / Chrome window opens in the other session
+
+Same shape as the wezterm case, with a different delegation key. Both apps are
+single-instance per **profile**: the lock is keyed by `--user-data-dir` and its
+socket lives in `$XDG_RUNTIME_DIR` (`/run/user/1000`, shared by both sessions).
+A launch that picks the profile already held by the other session does not
+create a window itself — it hands the request to that process, which opens the
+window on **its** display. Hence the wrappers give the xrdp session its own
+profile (`~/.vscode-remote-data`, `~/.config/google-chrome-remote`).
+
+That separation broke because the wrappers keyed off `$XRDP_SESSION`, which is
+**sticky**: `/etc/X11/Xsession.d/95dbus_update-activation-env` runs
+`dbus-update-activation-environment --systemd --all`, copying the xrdp session's
+whole environment into the per-user systemd/D-Bus activation environment. That
+store is add/overwrite-only, so a later local login refreshes `DISPLAY` to `:0`
+but cannot remove `XRDP_SESSION=1`:
+
+```sh
+$ systemctl --user show-environment | grep -E 'DISPLAY|XRDP_SESSION'
+DISPLAY=:0            # local seat, logged in last
+XRDP_SESSION=1        # left over from xrdp
+```
+
+wezterm panes inherit that store (`flatpak-spawn --host`), and a tmux server
+keeps its start-time copy (`update-environment` lists `DISPLAY` but not
+`XRDP_SESSION`, so only `DISPLAY` is refreshed on attach). A `code` run from a
+**local** pane therefore saw `DISPLAY=:0` with `XRDP_SESSION=1`, took the xrdp
+branch, and grabbed the xrdp profile — after which every xrdp launch was
+delegated to that local window. Observed as: launching VS Code from rofi in the
+xrdp session produced no window there, its log directory staying empty
+(`~/.vscode-remote-data/logs/<ts>/`) because it delegated and exited.
+
+**Fix:** decide per launch from `$DISPLAY`, the same socket test `~/.xsessionrc`
+uses, in `configs/vscode/.local/bin/code` and
+`configs/chrome/.local/bin/google-chrome-stable`:
+
+```sh
+_disp=${DISPLAY#:}; _disp=${_disp%%.*}
+if [ -n "$_disp" ] && [ -S "/run/xrdp/sockdir/xrdp_display_${_disp}" ]; then …
+```
+
+`$DISPLAY` is correct in every launch path (i3/rofi natively, panes via the
+wezterm fix above, tmux via `update-environment`), so the decision no longer
+depends on an inherited marker. Note that already-running mismatched instances
+keep their profile: close them, and reset a poisoned tmux server with
+`tmux setenv -gu XRDP_SESSION` (or restart it) if anything else still reads it.
+
 ## Related
 
 - `ime-here` in `configs/bash/.bashrc` (fcitx5 IME placement; now trusts

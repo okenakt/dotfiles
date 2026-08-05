@@ -52,9 +52,14 @@ if [ -n "$_xrdp_disp" ] && [ -S "/run/xrdp/sockdir/xrdp_display_${_xrdp_disp}" ]
 fi
 ```
 
-`XRDP_SESSION` doubles as the session-type signal read by the `chrome` and
-`vscode` wrappers (they pick a separate profile under xrdp), so it is exported
-session-wide here, inherited by i3 and all its children.
+The markers are consumed by the loader itself. They are **not** a reliable
+session signal for anything spawned outside the X session tree: `/etc/X11/
+Xsession.d/95dbus_update-activation-env` copies the whole session environment
+into the per-user (session-shared) systemd/D-Bus activation environment, which
+only ever gains variables, so `XRDP_SESSION=1` survives there — and in
+long-lived tmux servers — after the local session logs in. The `chrome` and
+`vscode` wrappers therefore repeat the socket check against their own `$DISPLAY`
+instead of reading the marker. See `docs/session-display.md`.
 
 ```mermaid
 flowchart TD
@@ -63,7 +68,7 @@ flowchart TD
     B -- yes (xrdp) --> X[export XRDP_SESSION / XRDP_SOCKET_PATH]
     X --> Y[run load_pw_modules.sh]
     Y --> Z[xrdp-sink / xrdp-source created<br/>default sink = xrdp-sink]
-    X --> W[chrome / vscode wrappers pick the xrdp profile]
+    B -. same check, re-run per launch .-> W[chrome / vscode wrappers<br/>pick the xrdp profile]
 ```
 
 ### Why detection is socket-based
@@ -138,9 +143,11 @@ in the xrdp session and check:
    ```sh
    audio-out --test    # left-then-right tone via the default (xrdp-sink)
    ```
-5. `chrome` / `vscode` pick the xrdp profile (they key off `XRDP_SESSION`):
+5. `chrome` / `vscode` pick the xrdp profile (they key off `$DISPLAY`, not the
+   markers):
    ```sh
-   echo $XRDP_SESSION   # 1 in the xrdp session
+   echo $DISPLAY                                  # :10 in the xrdp session
+   ls /run/xrdp/sockdir/xrdp_display_10           # the socket the wrappers test
    ```
 
 If `xrdp-sink` does not appear, see Troubleshooting.
