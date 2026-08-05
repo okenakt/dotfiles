@@ -17,18 +17,7 @@
       "Bash(uv:*)",
       "Bash(cargo:*)",
       "Bash(rustc:*)",
-      "Bash(docker:*)",
-      "mcp__plugin_telegram_telegram__reply",
-      "mcp__plugin_telegram_telegram__react",
-      "mcp__plugin_telegram_telegram__edit_message",
-      "mcp__plugin_telegram_telegram__download_attachment",
-      "Skill(telegram:configure)",
-      "Skill(telegram:access)",
-      "Read(//home/tkaneko/.claude/channels/telegram/**)",
-      "Read(//home/tkaneko/.claude/plugins/cache/claude-plugins-official/telegram/0.0.6/**)",
-      "Bash(mv ~/.claude/channels/telegram/.env.tmp ~/.claude/channels/telegram/.env)",
-      "Bash(chmod 600 ~/.claude/channels/telegram/.env)",
-      "Bash(mkdir -p ~/.claude/channels/telegram/approved)"
+      "Bash(docker:*)"
     ],
     "deny": [
       "Read(./.env)",
@@ -49,8 +38,7 @@
   },
   "model": "opus[1m]",
   "enabledPlugins": {
-    "codex@openai-codex": true,
-    "telegram@claude-plugins-official": true
+    "codex@openai-codex": true
   },
   "extraKnownMarketplaces": {
     "openai-codex": {
