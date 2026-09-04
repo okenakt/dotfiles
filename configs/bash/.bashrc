@@ -100,14 +100,14 @@ export QT_IM_MODULE=fcitx
 export XMODIFIERS=@im=fcitx
 
 # wezterm: GUI-start path forces --always-new-process (avoid delegating a window
-# to another session's display); other subcommands pass through. See
-# docs/session-display.md.
+# to another session's display); other subcommands pass through natively. See
+# docs/session-display.md. `command` avoids recursing into this function.
 wezterm() {
   case "${1:-}" in
     ""|start)
-      flatpak run org.wezfurlong.wezterm start --always-new-process "${@:2}" ;;
+      command wezterm start --always-new-process "${@:2}" ;;
     *)
-      flatpak run org.wezfurlong.wezterm "$@" ;;
+      command wezterm "$@" ;;
   esac
 }
 

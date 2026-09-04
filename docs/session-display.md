@@ -2,7 +2,7 @@
 
 Why a terminal on the local seat could report the wrong `$DISPLAY` (e.g. `:10.0`
 instead of `:0`) while both a local and an xrdp session are logged in, what the
-root cause is, and how it is fixed in this repo.
+root cause was, and why running wezterm natively removed it.
 
 ## Symptom
 
@@ -17,18 +17,21 @@ wrong display. `ime-here` was written to work around exactly this.
 
 ## Root cause
 
-Several facts combine (all confirmed by inspection on this machine):
+This analysis describes the Flatpak build of wezterm, which is no longer used;
+see [Resolution](#resolution). Several facts combined (all confirmed by
+inspection on this machine at the time):
 
 1. **Two concurrent X sessions, one shared user environment.** There is a
    single `systemd --user` manager per user. Its environment block
    (`systemctl --user show-environment`) holds **one** `DISPLAY`, overwritten by
    whichever session logged in last. After an xrdp login it becomes `:10.0`.
 
-2. **wezterm runs as a Flatpak.** Panes are spawned on the host with
+2. **wezterm ran as a Flatpak.** Panes were spawned on the host with
    `flatpak-spawn --host`, which forwards only a curated set of variables
    (`TERM`, `COLORTERM`, `WEZTERM_*`, …) and **not** `DISPLAY`. The host shell
-   therefore inherits `DISPLAY` from the shared `systemd --user` / D-Bus
-   activation environment — the stale `:10.0`.
+   therefore inherited `DISPLAY` from the shared `systemd --user` / D-Bus
+   activation environment — the stale `:10.0`. This is the fact that no longer
+   holds.
 
 3. **Pane shells have no login session of their own.** They run under
    `user@1000.service` (the user manager), not under `session-c2.scope` or
@@ -56,34 +59,42 @@ flowchart TD
     E -. "leaks :10.0 into both" .-> P10
 ```
 
-## Fix
+## Resolution
 
-Forward each GUI's own `DISPLAY` to the panes it spawns, from
-`configs/wezterm/.config/wezterm/wezterm.lua`:
+wezterm now runs natively, installed from the fury.io apt repo by
+`scripts/install.sh`. Panes are forked straight from the GUI process and inherit
+its environment, so each pane gets that instance's own correct `DISPLAY`. Fact 2
+was the whole of the problem, and it no longer holds:
+
+```sh
+$ WEZTEST_MARKER=from-gui wezterm start --always-new-process -- \
+    bash -c 'echo "$WEZTEST_MARKER $DISPLAY"'
+from-gui :10.0
+```
+
+`WEZTEST_MARKER` is on no forwarding list; it reaches the pane because the pane
+inherits the GUI's environment wholesale. Under `flatpak-spawn --host` only the
+curated set survived, so `DISPLAY` had to be re-injected from the config, which
+is evaluated inside the GUI process and could therefore see the correct value:
 
 ```lua
--- wezterm.lua is evaluated inside the GUI process, so os.getenv sees that
--- instance's correct DISPLAY (local :0, xrdp :10). Forward it to every pane.
+-- removed with the move to native wezterm: this now sets DISPLAY to the value
+-- the pane already inherits.
 local gui_display = os.getenv("DISPLAY")
 if gui_display and gui_display ~= "" then
 	config.set_environment_variables = { DISPLAY = gui_display }
 end
 ```
 
-The config runs in the GUI process, so `os.getenv("DISPLAY")` returns that
-instance's correct value, and `set_environment_variables` re-exports it into
-panes over `flatpak-spawn --host`. This fixes fcitx5 and every other GUI app
-launched from a pane, on both local and xrdp, with no root changes.
-
 > Note: `wezterm.getenv` is **not** available in the packaged wezterm
 > (20240203-110809); it errors with `attempt to call a nil value`. Use the
-> standard Lua `os.getenv` instead.
+> standard Lua `os.getenv` if a config ever needs to read the environment again.
 
-## Approaches that do NOT work (and why)
+## Approaches that did not work (and why)
 
 - **Setting `DISPLAY` in `~/.xsessionrc`.** `.xsessionrc` only affects the X
-  session process tree, not the shared `systemd --user` / D-Bus environment that
-  `flatpak-spawn --host` reads. And a single shared value cannot be correct for
+  session process tree, not the shared `systemd --user` / D-Bus environment the
+  Flatpak panes read. And a single shared value cannot be correct for
   two concurrent displays — last writer wins, which is the bug itself. In
   `.xsessionrc` `$DISPLAY` is already correct per session; nothing to fix there.
 
@@ -91,8 +102,8 @@ launched from a pane, on both local and xrdp, with no root changes.
   `user@1000.service` with no session, so `loginctl` returns the seat session
   (`:0`) for every pane — correct for local, wrong for xrdp. Deriving it instead
   from `WEZTERM_UNIX_SOCKET` → gui pid → the gui's `DISPLAY` would be reliable
-  but heavy (per-shell `/proc` lookups) and shell-only. The GUI-side injection
-  above is cleaner and covers all panes.
+  but heavy (per-shell `/proc` lookups) and shell-only. Reading it from the GUI's
+  own environment is the right answer, and native panes get it for free.
 
 ## Verification
 
@@ -182,13 +193,13 @@ DISPLAY=:0            # local seat, logged in last
 XRDP_SESSION=1        # left over from xrdp
 ```
 
-wezterm panes inherit that store (`flatpak-spawn --host`), and a tmux server
-keeps its start-time copy (`update-environment` lists `DISPLAY` but not
-`XRDP_SESSION`, so only `DISPLAY` is refreshed on attach). A `code` run from a
-**local** pane therefore saw `DISPLAY=:0` with `XRDP_SESSION=1`, took the xrdp
-branch, and grabbed the xrdp profile — after which every xrdp launch was
-delegated to that local window. Observed as: launching VS Code from rofi in the
-xrdp session produced no window there, its log directory staying empty
+Flatpak wezterm panes inherited that store directly, and a tmux server keeps its
+start-time copy (`update-environment` lists `DISPLAY` but not `XRDP_SESSION`, so
+only `DISPLAY` is refreshed on attach). A `code` run from a **local** pane
+therefore saw `DISPLAY=:0` with `XRDP_SESSION=1`, took the xrdp branch, and
+grabbed the xrdp profile — after which every xrdp launch was delegated to that
+local window. Observed as: launching VS Code from rofi in the xrdp session
+produced no window there, its log directory staying empty
 (`~/.vscode-remote-data/logs/<ts>/`) because it delegated and exited.
 
 **Fix:** decide per launch from `$DISPLAY`, the same socket test `~/.xsessionrc`
@@ -200,14 +211,15 @@ _disp=${DISPLAY#:}; _disp=${_disp%%.*}
 if [ -n "$_disp" ] && [ -S "/run/xrdp/sockdir/xrdp_display_${_disp}" ]; then …
 ```
 
-`$DISPLAY` is correct in every launch path (i3/rofi natively, panes via the
-wezterm fix above, tmux via `update-environment`), so the decision no longer
-depends on an inherited marker. Note that already-running mismatched instances
+Native panes no longer read the shared store, but tmux servers still carry a
+stale `XRDP_SESSION`, so the wrappers keep deciding per launch. `$DISPLAY` is
+correct in every launch path (i3/rofi natively, panes by inheritance, tmux via
+`update-environment`), so the decision does not depend on an inherited marker. Note that already-running mismatched instances
 keep their profile: close them, and reset a poisoned tmux server with
 `tmux setenv -gu XRDP_SESSION` (or restart it) if anything else still reads it.
 
 ## Related
 
-- `ime-here` in `configs/bash/.bashrc` (fcitx5 IME placement; now trusts
-  `$DISPLAY` directly, relying on the pane-env fix above instead of `loginctl`).
+- `ime-here` in `configs/bash/.bashrc` (fcitx5 IME placement; trusts `$DISPLAY`
+  directly, relying on panes inheriting the GUI's value instead of `loginctl`).
 - `docs/remote-audio.md` (the xrdp audio side of local/remote coexistence).

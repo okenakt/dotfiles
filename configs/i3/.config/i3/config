@@ -57,7 +57,7 @@ exec_always --no-startup-id feh --bg-fill ~/Pictures/wallpapers/neon-city.jpg
 bindsym $mod+Return exec --no-startup-id rofi -show drun
 # --always-new-process: don't delegate the window to another session's display.
 # See docs/session-display.md.
-bindsym $mod+grave  exec --no-startup-id flatpak run org.wezfurlong.wezterm start --always-new-process
+bindsym $mod+grave  exec --no-startup-id wezterm start --always-new-process
 bindsym $mod+e      exec --no-startup-id rofi -show window
 bindsym $mod+l      exec --no-startup-id i3lock
 bindsym $mod+q      kill
