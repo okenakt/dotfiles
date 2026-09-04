@@ -7,6 +7,12 @@ if wezterm.target_triple == "x86_64-pc-windows-msvc" then
 	config.default_prog = { "powershell.exe" }
 end
 
+-- OpenGL needs DRI3, which this seatless session cannot reach, so it falls back
+-- to llvmpipe; WebGpu reaches the NVIDIA driver via /dev/nvidia* instead.
+-- See docs/remote-gpu.md.
+config.front_end = "WebGpu"
+config.webgpu_power_preference = "HighPerformance"
+
 -- Font
 config.font = wezterm.font("Pennywort", { weight = "Regular", stretch = "Normal", style = "Normal" })
 config.font_size = 12
