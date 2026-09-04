@@ -4,7 +4,6 @@ TARGET      := ${HOME}
 BACKUP_ROOT := backups
 BACKUP_DIR  := ${BACKUP_ROOT}/$(shell date +%Y%m%d%H%M%S)
 PACKAGES    := $(shell find ${STOW_DIR} -mindepth 1 -maxdepth 1 -type d -printf "%f ")
-pkg         ?=
 pkgs         = $(if ${pkg},${pkg},${PACKAGES})
 # Apps that write runtime state next to their config; folding would dump it here.
 NOFOLD_PKGS := vscode claude
