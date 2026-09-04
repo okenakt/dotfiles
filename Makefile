@@ -1,4 +1,5 @@
 STOW_DIR    := configs
+SCRIPT_DIR  := scripts
 TARGET      := ${HOME}
 BACKUP_ROOT := backups
 BACKUP_DIR  := ${BACKUP_ROOT}/$(shell date +%Y%m%d%H%M%S)
@@ -6,7 +7,7 @@ PACKAGES    := $(shell find ${STOW_DIR} -mindepth 1 -maxdepth 1 -type d -printf 
 pkg         ?=
 pkgs         = $(if ${pkg},${pkg},${PACKAGES})
 
-.PHONY: help list dry-run backup prepare restore apply delete doctor
+.PHONY: help list dry-run backup prepare restore apply delete doctor install packages apt-apps fonts gtk-theme
 
 help: ## Show available targets
 	@grep -E '^[a-zA-Z0-9_%-]+:.*?## ' Makefile | awk 'BEGIN{FS=":.*?## "}{printf "%-18s %s\n", $$1, $$2}'
@@ -99,3 +100,19 @@ delete: ## Unstow packages (set pkg=<name> to limit)
 
 doctor: ## Find broken symlinks in $HOME
 	find ${TARGET} -xtype l -print
+
+install: ## Install every dependency, then apply all packages
+	${SCRIPT_DIR}/install.sh
+	@$(MAKE) --no-print-directory apply
+
+gtk-theme: ## Install the Sweet GTK theme and candy-icons (set variant=<name>, force=1)
+	${SCRIPT_DIR}/install.sh gtk-theme $(if ${variant},--variant ${variant}) $(if ${force},--force)
+
+fonts: ## Install the Pennywort font families (set force=1 to reinstall)
+	${SCRIPT_DIR}/install.sh fonts $(if ${force},--force)
+
+packages: ## Install the Ubuntu-repo packages the configs depend on (set force=1 to reinstall)
+	${SCRIPT_DIR}/install.sh packages $(if ${force},--force)
+
+apt-apps: ## Install code, chrome and wezterm from their apt repos (set app=<name>, force=1)
+	${SCRIPT_DIR}/install.sh apt-apps ${app} $(if ${force},--force)
