@@ -16,19 +16,13 @@
   },
   {
     "key": "ctrl+pageup",
-    "command": "cursorTop"
+    "command": "bookmarks.jumpToPrevious",
+    "when": "!terminalFocus"
   },
   {
     "key": "ctrl+pagedown",
-    "command": "cursorBottom"
-  },
-  {
-    "key": "ctrl+home",
-    "command": "bookmarks.jumpToPrevious"
-  },
-  {
-    "key": "ctrl+end",
-    "command": "bookmarks.jumpToNext"
+    "command": "bookmarks.jumpToNext",
+    "when": "!terminalFocus"
   },
   {
     "key": "ctrl+`",
@@ -84,15 +78,18 @@
   },
   {
     "key": "ctrl+m",
-    "command": "bookmarks.toggle"
+    "command": "bookmarks.toggle",
+    "when": "!terminalFocus" // keep terminal Ctrl+M (CR) intact
   },
   {
     "key": "ctrl+,",
-    "command": "workbench.action.toggleSidebarVisibility"
+    "command": "workbench.action.navigateBack",
+    "when": "!terminalFocus"
   },
   {
     "key": "ctrl+.",
-    "command": "workbench.action.toggleAuxiliaryBar"
+    "command": "workbench.action.navigateForward",
+    "when": "!terminalFocus"
   },
 
   // ======================================//
@@ -111,12 +108,22 @@
     "args": { "to": "nextBlankLine", "select": true }
   },
   {
+    "key": "ctrl+shift+home",
+    "command": "cursorTopSelect",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "ctrl+shift+end",
+    "command": "cursorBottomSelect",
+    "when": "editorTextFocus"
+  },
+  {
     "key": "ctrl+shift+pageup",
-    "command": "cursorTopSelect"
+    "command": "-workbench.action.moveEditorLeftInGroup" // editor reordering belongs to Alt+Shift
   },
   {
     "key": "ctrl+shift+pagedown",
-    "command": "cursorBottomSelect"
+    "command": "-workbench.action.moveEditorRightInGroup"
   },
   {
     "key": "ctrl+shift+i",
@@ -187,16 +194,6 @@
     "command": "workbench.action.toggleMaximizeEditorGroup",
     "when": "!terminalFocus && (activeEditorGroupEmpty || editorTextFocus || editorIsOpen)"
   },
-  {
-    "key": "alt+,",
-    "command": "workbench.action.navigateBack",
-    "when": "!terminalFocus"
-  },
-  {
-    "key": "alt+.",
-    "command": "workbench.action.navigateForward",
-    "when": "!terminalFocus"
-  },
 
   // Terminal
   {
@@ -246,6 +243,18 @@
     "command": "workbench.action.terminal.sendSequence",
     "when": "terminalFocus",
     "args": { "text": "\u001b[1;7D" }
+  },
+  {
+    "key": "ctrl+home",
+    "command": "workbench.action.terminal.sendSequence",
+    "when": "terminalFocus", // forward to inner TUI apps instead of scrolling the buffer
+    "args": { "text": "\u001b[1;5H" }
+  },
+  {
+    "key": "ctrl+end",
+    "command": "workbench.action.terminal.sendSequence",
+    "when": "terminalFocus",
+    "args": { "text": "\u001b[1;5F" }
   },
   {
     "key": "alt+pageup",
@@ -316,6 +325,16 @@
   {
     "key": "alt+shift+right",
     "command": "workbench.action.moveEditorToRightGroup",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "alt+shift+pageup",
+    "command": "workbench.action.moveEditorLeftInGroup",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "alt+shift+pagedown",
+    "command": "workbench.action.moveEditorRightInGroup",
     "when": "!terminalFocus"
   },
 
