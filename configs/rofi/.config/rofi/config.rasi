@@ -1,6 +1,5 @@
 configuration {
     show-icons: true;
-    icon-theme: "Candy-icons";
     font: "Pennywort23 12";
     display-drun: "Apps";
     display-run: "Run";
