@@ -6,6 +6,9 @@ BACKUP_DIR  := ${BACKUP_ROOT}/$(shell date +%Y%m%d%H%M%S)
 PACKAGES    := $(shell find ${STOW_DIR} -mindepth 1 -maxdepth 1 -type d -printf "%f ")
 pkg         ?=
 pkgs         = $(if ${pkg},${pkg},${PACKAGES})
+# Apps that write runtime state next to their config; folding would dump it here.
+NOFOLD_PKGS := vscode claude
+NOFOLD_FLAG  = case " ${NOFOLD_PKGS} " in *" $$p "*) opts="--no-folding";; *) opts="";; esac
 
 .PHONY: help list dry-run backup prepare restore apply delete doctor install packages apt-apps fonts gtk-theme
 
@@ -19,7 +22,8 @@ dry-run: ## Show what would be linked (set pkg=<name> to limit)
 	@echo "== Dry run =="; \
 	for p in ${pkgs}; do \
 	  echo ""; echo "[$$p]"; \
-	  stow -n -v -d ${STOW_DIR} -t ${TARGET} $$p || true; \
+	  ${NOFOLD_FLAG}; \
+	  stow -n -v $$opts -d ${STOW_DIR} -t ${TARGET} $$p || true; \
 	done
 
 backup: ## Back up existing files that would be replaced (set pkg=<name> to limit)
@@ -93,7 +97,10 @@ restore: ## Restore backed up files into ${TARGET}; set backup=<dir> and optiona
 	done
 
 apply: prepare ## Back up, prepare targets, and apply packages (set pkg=<name> to limit)
-	stow -R -v -d ${STOW_DIR} -t ${TARGET} ${pkgs}
+	@for p in ${pkgs}; do \
+	  ${NOFOLD_FLAG}; \
+	  stow -R -v $$opts -d ${STOW_DIR} -t ${TARGET} $$p || exit $$?; \
+	done
 
 delete: ## Unstow packages (set pkg=<name> to limit)
 	stow -D -d ${STOW_DIR} -t ${TARGET} ${pkgs}

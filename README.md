@@ -18,6 +18,16 @@ Oh my dotfiles.
 - `make packages` to install the Ubuntu-repository packages the configs depend on. `scripts/install.sh packages --list` shows the list and what is already present. Needs sudo.
 - `make apt-apps` to install VS Code, Chrome and WezTerm from their apt repos, so `apt upgrade` keeps them current. Set `app=<name>` to limit to one. Needs sudo.
 
+## Tree folding
+
+Stow links a whole directory into this repo when the matching target directory
+does not exist yet, so a package holding a single file can end up owning all of
+`~/.config`. That is fine for apps that only read their config directory, but an
+app that also writes runtime state there (VS Code: caches, logs, state DBs) then
+writes it straight into the working tree. `NOFOLD_PKGS` in the Makefile lists the
+packages that must keep a real target directory; `apply` and `dry-run` pass
+`--no-folding` for those.
+
 ## Documents
 
 - [Keybinding Principles](docs/keybinding-principles.md)
