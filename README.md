@@ -31,3 +31,4 @@ packages that must keep a real target directory; `apply` and `dry-run` pass
 ## Documents
 
 - [Keybinding Principles](docs/keybinding-principles.md)
+- [Git Account Setup](docs/git-account-setup.md)

@@ -1,0 +1,256 @@
+#!/usr/bin/env bash
+# Add, list, and remove per-account GitHub identities.
+#
+# Writes the untracked half of the layout described in
+# docs/git-account-setup.md: one file per account holding its identity and
+# URL rewriting, one shared file holding the conditional includes, and one ssh
+# host alias pinning that account's key.
+set -euo pipefail
+
+readonly GITCONFIG_D="${HOME}/.gitconfig.d"
+readonly ACCOUNTS="${HOME}/.gitconfig-accounts"
+readonly SSH_CONFIG_D="${HOME}/.ssh/config.d"
+
+die() {
+	echo "git-account: $*" >&2
+	exit 1
+}
+
+usage() {
+	cat >&2 <<'EOF'
+usage: git account <command>
+
+  add                add a GitHub account interactively
+  list               list configured accounts
+  remove <username>  remove a GitHub account
+  status             show the identity applied in the current repository
+EOF
+	exit 2
+}
+
+# Prompt until a non-empty answer is given. $3 is an optional default.
+ask() {
+	local var=$1 prompt=$2 default=${3:-} reply
+	while true; do
+		if [ -n "${default}" ]; then
+			read -r -p "${prompt} [${default}]: " reply || die "aborted"
+			reply=${reply:-${default}}
+		else
+			read -r -p "${prompt}: " reply || die "aborted"
+		fi
+		[ -n "${reply}" ] && break
+		echo "  a value is required" >&2
+	done
+	printf -v "${var}" '%s' "${reply}"
+}
+
+confirm() {
+	local reply
+	read -r -p "$1 [Y/n]: " reply || die "aborted"
+	case ${reply} in
+	[nN] | [nN][oO]) return 1 ;;
+	*) return 0 ;;
+	esac
+}
+
+# The username doubles as a GitHub login and a filename.
+validate_username() {
+	case $1 in
+	*[!A-Za-z0-9-]* | -* | *- | "") die "invalid username: $1" ;;
+	esac
+}
+
+# The three URL forms a repository of this account can be cloned with.
+account_urls() {
+	local username=$1
+	printf '%s\n' \
+		"https://github.com/${username}/**" \
+		"git@github.com:${username}/**" \
+		"git@github-${username}:${username}/**"
+}
+
+# IdentityFile as recorded in the host alias, or empty if there is none.
+account_key() {
+	awk '/^[[:space:]]*IdentityFile[[:space:]]/ {print $2; exit}' \
+		"${SSH_CONFIG_D}/github-$1.conf" 2>/dev/null || true
+}
+
+list_usernames() {
+	local f
+	shopt -s nullglob
+	for f in "${GITCONFIG_D}"/*; do
+		[ -f "${f}" ] && basename "${f}"
+	done
+	shopt -u nullglob
+}
+
+cmd_list() {
+	local username name email key state found=0
+	while read -r username; do
+		[ -n "${username}" ] || continue
+		found=1
+		name=$(git config --file "${GITCONFIG_D}/${username}" user.name || true)
+		email=$(git config --file "${GITCONFIG_D}/${username}" user.email || true)
+		key=$(account_key "${username}")
+		state="no host alias"
+		if [ -n "${key}" ]; then
+			state="${key}"
+			[ -f "${key/#\~/${HOME}}" ] || state="${key} (missing)"
+		fi
+		printf '%-16s %s <%s>\n' "${username}" "${name}" "${email}"
+		printf '%-16s host github-%s, key %s\n' "" "${username}" "${state}"
+	done < <(list_usernames)
+	[ "${found}" -eq 1 ] || echo "no accounts configured; run 'git account add'"
+}
+
+cmd_add() {
+	local username name email key alias url
+	ask username "GitHub username"
+	validate_username "${username}"
+	[ -e "${GITCONFIG_D}/${username}" ] && die "account already configured: ${username}"
+
+	ask name "Display name" "$(git config user.name || true)"
+	ask email "Email address"
+	case ${email} in
+	*@*) ;;
+	*) die "invalid email address: ${email}" ;;
+	esac
+
+	alias="github-${username}"
+	key="${HOME}/.ssh/id_ed25519_${username}"
+	ask key "SSH key" "${key}"
+	key=${key/#\~/${HOME}}
+	if [ ! -f "${key}" ]; then
+		confirm "${key} does not exist. Generate it?" ||
+			die "no key; aborting"
+		install -d -m 700 "$(dirname "${key}")"
+		ssh-keygen -t ed25519 -f "${key}" -C "${username}@$(hostname)"
+	fi
+
+	# install -d also fixes the mode of a directory Stow already created.
+	install -d -m 700 "${HOME}/.ssh" "${SSH_CONFIG_D}" "${GITCONFIG_D}"
+
+	# Identity and URL rewriting: read only when a repository matches below.
+	git config --file "${GITCONFIG_D}/${username}" user.name "${name}"
+	git config --file "${GITCONFIG_D}/${username}" user.email "${email}"
+	git config --file "${GITCONFIG_D}/${username}" \
+		"url.git@${alias}:${username}/.insteadOf" "https://github.com/${username}/"
+	git config --file "${GITCONFIG_D}/${username}" --add \
+		"url.git@${alias}:${username}/.insteadOf" "git@github.com:${username}/"
+
+	# hasconfig matches the raw remote URL, before insteadOf rewriting,
+	# so every URL form has to be listed.
+	while read -r url; do
+		git config --file "${ACCOUNTS}" \
+			"includeIf.hasconfig:remote.*.url:${url}.path" \
+			"~/.gitconfig.d/${username}"
+	done < <(account_urls "${username}")
+
+	umask 077
+	{
+		printf 'Host %s\n' "${alias}"
+		printf '\tHostName github.com\n'
+		printf '\tUser git\n'
+		printf '\tIdentityFile %s\n' "${key/#${HOME}/\~}"
+		printf '\tIdentitiesOnly yes\n'
+		printf '\tAddKeysToAgent yes\n'
+	} >"${SSH_CONFIG_D}/${alias}.conf"
+
+	echo
+	echo "Configured ${username}. Register this public key at"
+	echo "https://github.com/settings/ssh/new"
+	echo
+	cat "${key}.pub"
+	echo
+	echo "Then verify with: ssh -T git@${alias}"
+}
+
+cmd_remove() {
+	local username=${1:-} key url
+	[ -n "${username}" ] || usage
+	validate_username "${username}"
+	[ -f "${GITCONFIG_D}/${username}" ] || die "no such account: ${username}"
+
+	key=$(account_key "${username}")
+	while read -r url; do
+		git config --file "${ACCOUNTS}" --remove-section \
+			"includeIf.hasconfig:remote.*.url:${url}" 2>/dev/null || true
+	done < <(account_urls "${username}")
+	rm -f "${GITCONFIG_D}/${username}" "${SSH_CONFIG_D}/github-${username}.conf"
+
+	echo "Removed ${username}."
+	# The key is left alone: deleting it is not reversible.
+	[ -n "${key}" ] && echo "Its key ${key} was kept; delete it yourself if unused."
+	echo "Remove the key from https://github.com/settings/keys as well."
+}
+
+# The file git read user.email from, or empty when no identity applies.
+identity_origin() {
+	git config --show-origin user.email 2>/dev/null | cut -f1 | sed 's|^file:||' ||
+		true
+}
+
+cmd_status() {
+	local remote url rewritten origin username="" name email key
+
+	git rev-parse --git-dir >/dev/null 2>&1 || die "not inside a git repository"
+
+	remote=$(git remote | grep -x origin || true)
+	[ -n "${remote}" ] || remote=$(git remote | head -1)
+	url=""
+	if [ -n "${remote}" ]; then
+		url=$(git config "remote.${remote}.url" || true)
+		rewritten=$(git ls-remote --get-url "${remote}")
+	fi
+
+	name=$(git config user.name || true)
+	email=$(git config user.email || true)
+	origin=$(identity_origin)
+
+	if [ -z "${email}" ]; then
+		echo "no account matched"
+	else
+		case ${origin} in
+		"${GITCONFIG_D}"/*)
+			username=$(basename "${origin}")
+			printf '%-16s %s <%s>\n' "${username}" "${name}" "${email}"
+			printf '%-16s matched ~/.gitconfig.d/%s\n' "" "${username}"
+			;;
+		*)
+			printf '%-16s %s <%s>\n' "(local)" "${name}" "${email}"
+			printf '%-16s set in %s\n' "" "${origin}"
+			;;
+		esac
+	fi
+
+	if [ -n "${remote}" ]; then
+		printf '%-16s remote  %s\n' "" "${url}"
+		if [ "${rewritten}" != "${url}" ]; then
+			printf '%-16s         -> %s\n' "" "${rewritten}"
+		fi
+	else
+		printf '%-16s remote  none configured\n' ""
+	fi
+
+	if [ -n "${username}" ]; then
+		key=$(account_key "${username}")
+		if [ -n "${key}" ]; then
+			printf '%-16s key     %s\n' "" "${key}"
+		fi
+	fi
+
+	if [ -z "${email}" ]; then
+		if [ -z "${remote}" ]; then
+			printf '%-16s hasconfig has no URL to match\n' ""
+		fi
+		printf '%-16s commits will fail; user.useConfigOnly is set\n' ""
+	fi
+}
+
+case ${1:-} in
+add) cmd_add ;;
+list) cmd_list ;;
+remove) cmd_remove "${2:-}" ;;
+status) cmd_status ;;
+*) usage ;;
+esac
