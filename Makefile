@@ -6,7 +6,7 @@ BACKUP_DIR  := ${BACKUP_ROOT}/$(shell date +%Y%m%d%H%M%S)
 PACKAGES    := $(shell find ${STOW_DIR} -mindepth 1 -maxdepth 1 -type d -printf "%f ")
 pkgs         = $(if ${pkg},${pkg},${PACKAGES})
 # Apps that write runtime state next to their config; folding would dump it here.
-NOFOLD_PKGS := vscode claude
+NOFOLD_PKGS := vscode claude ssh
 NOFOLD_FLAG  = case " ${NOFOLD_PKGS} " in *" $$p "*) opts="--no-folding";; *) opts="";; esac
 
 .PHONY: help list dry-run backup prepare restore apply delete doctor install packages apt-apps fonts gtk-theme

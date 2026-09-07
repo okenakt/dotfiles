@@ -99,7 +99,7 @@ Until the first account is added, commits fail by design.
 
 ## Notes
 
-Four behaviours were confirmed by experiment and are easy to get wrong.
+Five behaviours were confirmed by experiment and are easy to get wrong.
 
 **`hasconfig` matches the raw URL.** The condition is evaluated against the URL
 as written in the repository's config, *before* `insteadOf` rewriting —
@@ -122,6 +122,14 @@ why `~/.gitconfig-accounts` exists; it holds nothing but `includeIf` lines.
 
 **ssh keeps the first match,** so `Include ~/.ssh/config.d/*.conf` has to stay
 above any `Host` block that could also match, or the included values lose.
+
+**Stow would fold `~/.ssh` into this repository** on a machine where that
+directory does not exist yet, which would make the working tree the place where
+private keys land. The ssh package is therefore listed in `NOFOLD_PKGS` (see
+README) so that a real directory is kept. Stow creates it with the ambient
+umask, so `git account add` runs `install -d -m 700` before placing a key —
+`install -d` corrects the mode of a directory that already exists, which
+`mkdir -m` does not.
 
 Two things turned out not to be problems: a missing `include` target is ignored
 rather than an error, and `~/.ssh/config` at mode 664 is accepted (the strict
