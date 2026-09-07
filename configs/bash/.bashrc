@@ -120,3 +120,6 @@ alias teleclaude='claude --channels plugin:telegram@claude-plugins-official'
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+
+# Rust toolchain (rustup)
+. "$HOME/.cargo/env"
