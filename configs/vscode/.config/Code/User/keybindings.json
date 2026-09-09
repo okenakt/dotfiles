@@ -145,9 +145,8 @@
   },
   {
     "key": "alt+down",
-    "command": "-editor.action.moveLinesDownAction" // temporarily overwritten to re-learn terminal focus
-    // "command": "workbench.action.navigateDown",
-    // "when": "!terminalFocus"
+    "command": "workbench.action.navigateDown",
+    "when": "!terminalFocus"
   },
   {
     "key": "alt+left",
