@@ -9,9 +9,8 @@
       "WebFetch(domain:stackoverflow.com)"
     ],
     "deny": [
-      "Read(./.env)",
-      "Read(./.env.*)",
-      "Read(./secrets/**)",
+      "Read(~/.ssh/**)",
+      "Edit(~/.ssh/**)",
 
       "Bash(sudo:*)",
       "Bash(su:*)",
